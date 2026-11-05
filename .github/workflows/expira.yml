@@ -1,0 +1,30 @@
+name: expira
+# Link temporário (pedido do dono, Telegram 7452: "link temporário no GitHub por 48 horas").
+# Na hora marcada, troca o site por "link expirado" num commit ÓRFÃO (o jogo sai do ramo) e força o push.
+on:
+  schedule:
+    - cron: "40 3 7 11 *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  expira:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Troca o site por "link expirado"
+        run: |
+          set -e
+          AGORA=$(date -u +%s)
+          LIMITE=1794022808
+          if [ "$AGORA" -lt "$LIMITE" ] && [ "${{ github.event_name }}" = "schedule" ]; then echo "ainda não venceu"; exit 0; fi
+          mkdir -p /tmp/site/.github/workflows
+          cp .github/workflows/expira.yml /tmp/site/.github/workflows/expira.yml
+          cd /tmp/site
+          printf '%s' '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Link expirado</title></head><body style="font:20px sans-serif;margin:40px;background:#1d2b44;color:#fff"><p>Este link de teste expirou.</p></body></html>' > index.html
+          printf 'User-agent: *\nDisallow: /\n' > robots.txt
+          touch .nojekyll
+          git init -q -b main
+          git add -A
+          git -c user.name=gilmadson -c user.email=4312127+gilmadson@users.noreply.github.com commit -q -m "link expirado"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" main
