@@ -3,7 +3,7 @@ name: expira
 # Na hora marcada, troca o site por "link expirado" num commit ÓRFÃO (o jogo sai do ramo) e força o push.
 on:
   schedule:
-    - cron: "7 20 7 11 *"
+    - cron: "59 2 23 11 *"
   workflow_dispatch:
 permissions:
   contents: write
@@ -16,7 +16,7 @@ jobs:
         run: |
           set -e
           AGORA=$(date -u +%s)
-          LIMITE=1794082033
+          LIMITE=1795402740
           if [ "$AGORA" -lt "$LIMITE" ] && [ "${{ github.event_name }}" = "schedule" ]; then echo "ainda não venceu"; exit 0; fi
           mkdir -p /tmp/site/.github/workflows
           cp .github/workflows/expira.yml /tmp/site/.github/workflows/expira.yml
